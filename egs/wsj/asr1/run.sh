@@ -41,8 +41,8 @@ n_average=10 # use 1 for RNN models
 recog_model=model.acc.best # set a model to be used for decoding: 'model.acc.best' or 'model.loss.best'
 
 # data
-wsj0=/export/corpora5/LDC/LDC93S6B
-wsj1=/export/corpora5/LDC/LDC94S13B
+# wsj0=/export/corpora5/LDC/LDC93S6B
+# wsj1=/export/corpora5/LDC/LDC94S13B
 
 # exp tag
 tag="" # tag for managing experiments.
@@ -55,18 +55,34 @@ set -e
 set -u
 set -o pipefail
 
+train="/mnt/iuliia/models/archimob_r2/models/initial_data/data"
+dev="/mnt/iuliia/models/archimob_r2/scores/scores_nnet_disc_4k/lang"
+test="/mnt/iuliia/models/archimob_r2/scores/test/nnet_disc4k40k/lang"
+
+lm="/mnt/iuliia/models/archimob_r2/language_modeling/language_model.arpa"
+
 train_set=train_si284
 train_dev=test_dev93
 train_test=test_eval92
 recog_set="test_dev93 test_eval92"
 
-if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
-    ### Task dependent. You have to make data the following preparation part by yourself.
-    ### But you can utilize Kaldi recipes in most cases
-    echo "stage 0: Data preparation"
-    local/wsj_data_prep.sh ${wsj0}/??-{?,??}.? ${wsj1}/??-{?,??}.?
-    local/wsj_format_data.sh
-fi
+dir=`pwd`/data/local/data
+lmdir=`pwd`/data/local/nist_lm
+mkdir -p $dir $lmdir
+local=`pwd`/local
+utils=`pwd`/utils
+
+# if [ ${stage} -le 0 ] && [ ${stop_stage} -ge 0 ]; then
+#     ### Task dependent. You have to make data the following preparation part by yourself.
+#     ### But you can utilize Kaldi recipes in most cases
+#     echo "stage 0: Data preparation"
+#     local/wsj_data_prep.sh ${wsj0}/??-{?,??}.? ${wsj1}/??-{?,??}.?
+#     local/wsj_format_data.sh
+# fi
+
+cp -r $train data/train_si284
+cp -r $dev data/test_dev93
+cp -r $test data/test_eval92
 
 feat_tr_dir=${dumpdir}/${train_set}/delta${do_delta}; mkdir -p ${feat_tr_dir}
 feat_dt_dir=${dumpdir}/${train_dev}/delta${do_delta}; mkdir -p ${feat_dt_dir}
